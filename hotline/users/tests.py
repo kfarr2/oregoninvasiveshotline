@@ -13,27 +13,6 @@ from .forms import LoginForm, UserForm
 from .models import User
 
 
-class DetailViewTest(TestCase):
-    """
-    Tests for the detail view
-    """
-    def test_permission(self):
-        user = make(User, is_active=False)
-        response = self.client.get(reverse("users-detail", args=[user.pk]))
-        self.assertEqual(response.status_code, 404)
-
-        user = make(User, is_active=True)
-        response = self.client.get(reverse("users-detail", args=[user.pk]))
-        self.assertEqual(response.status_code, 200)
-
-    def test_get(self):
-        user = prepare(User)
-        user.set_password("foobar")
-        user.save()
-        self.client.login(email=user.email, password="foobar")
-        self.client.get(reverse("users-detail", args=[user.pk]))
-
-
 class AuthenticateViewTest(TestCase):
     def test_bad_signature_redirects_to_home(self):
         response = self.client.get(reverse("users-authenticate") + "?sig=asfd")

@@ -4,6 +4,7 @@ from arcutils import will_be_deleted_with
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login as django_login
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import login as django_login_view
 from django.core.signing import BadSignature
 from django.db.models import Q
@@ -80,7 +81,6 @@ def avatar(request, user_id, colors="AliceBlue AntiqueWhite Aqua Aquamarine Azur
         "text_color": text_color,
     }, content_type="image/svg+xml")
 
-
 def home(request):
     """
     Just redirect to the detail view for the user. This page exists solely
@@ -94,12 +94,12 @@ def home(request):
 
     return render(request, "users/home.html", {
         "user": user,
-        "reported_querystring": user.get_reported_querystring,
-        "invited_to": user.get_invited,
-        "reported": user.get_reported,
-        "subscribed": user.get_subscriptions,
-        "open_and_claimed": user.get_open_and_claimed,
-        "unclaimed_reports": user.get_unclaimed
+        "reported_querystring": user.get_reported_querystring if not user.is_anonymous() else None,
+        "invited_to": user.get_invited if not user.is_anonymous() else None,
+        "reported": user.get_reported if not user.is_anonymous() else None,
+        "subscribed": user.get_subscriptions if not user.is_anonymous() else None,
+        "open_and_claimed": user.get_open_and_claimed if not user.is_anonymous() else None,
+        "unclaimed_reports": user.get_unclaimed if not user.is_anonymous() else None
     })
 
 

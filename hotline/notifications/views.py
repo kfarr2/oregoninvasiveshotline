@@ -51,10 +51,10 @@ def list_(request):
     return render(request, "notifications/list.html", {
         "form": form,
         "user": user,
-        "reported_querystring": user.get_reported_querystring,
-        "invited_to": user.get_invited,
-        "reported": user.get_reported,
-        "subscribed": user.get_subscriptions,
-        "open_and_claimed": user.get_open_and_claimed,
-        "unclaimed_reports": user.get_unclaimed
+        "reported_querystring": user.get_reported_querystring if not user.is_anonymous() else None,
+        "invited_to": user.get_invited if not user.is_anonymous() else None,
+        "reported": user.get_reported if not user.is_anonymous() else None,
+        "subscribed": user.get_subscriptions if not user.is_anonymous() else None,
+        "open_and_claimed": user.get_open_and_claimed if not user.is_anonymous() else None,
+        "unclaimed_reports": user.get_unclaimed if not user.is_anonymous() else None
     })
