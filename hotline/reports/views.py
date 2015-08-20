@@ -40,15 +40,6 @@ def list_(request):
     # all that awesome tabs stuff
     user = request.user
     tab = request.GET.get('tabs') if request.GET.get('tabs') is not None else "search"
-    subscribed = UserNotificationQuery.objects.filter(user_id=user.pk)
-    invited_to = [invite.report for invite in Invite.objects.filter(user_id=user.pk).select_related("report")]
-    reported = Report.objects.filter(Q(pk__in=request.session.get("report_ids", [])) | Q(created_by_id=user.pk))
-    reported_querystring = "created_by_id:(%s)" % (" ".join(map(str, set(reported.values_list("created_by_id", flat=True)))))
-    open_and_claimed = Report.objects.filter(claimed_by_id=user.pk, is_public=False, is_archived=False).exclude(claimed_by=None)
-
-    unclaimed_reports = []
-    if user.is_authenticated() and user.is_active:
-        unclaimed_reports = Report.objects.filter(claimed_by=None, is_public=False, is_archived=False)
 
     form = ReportSearchForm(request.GET, user=request.user, report_ids=request.session.get("report_ids", []))
 
@@ -67,12 +58,12 @@ def list_(request):
         "form": form,
         "reports_json": json.dumps(reports_json),
         "tab": tab,
-        "invited_to": invited_to,
-        "reported": reported,
-        "subscribed": subscribed,
-        "open_and_claimed": open_and_claimed,
-        "unclaimed_reports": unclaimed_reports,
-        "reported_querystring": reported_querystring
+        "invited_to": user.get_invited,
+        "reported": user.get_reported,
+        "reported_querystring": user.get_reported_querystring,
+        "subscribed": user.get_subscriptions,
+        "open_and_claimed": user.get_open_and_claimed,
+        "unclaimed_reports": user.get_unclaimed
     })
 
 
@@ -301,22 +292,13 @@ def unclaim(request, report_id):
 
 def invited(request):
     user = request.user
-    subscribed = UserNotificationQuery.objects.filter(user_id=user.pk)
-    invited_to = [invite.report for invite in Invite.objects.filter(user_id=user.pk).select_related("report")]
-    reported = Report.objects.filter(Q(pk__in=request.session.get("report_ids", [])) | Q(created_by_id=user.pk))
-    reported_querystring = "created_by_id:(%s)" % (" ".join(map(str, set(reported.values_list("created_by_id", flat=True)))))
-    open_and_claimed = Report.objects.filter(claimed_by_id=user.pk, is_public=False, is_archived=False).exclude(claimed_by=None)
-
-    unclaimed_reports = []
-    if user.is_authenticated() and user.is_active:
-        unclaimed_reports = Report.objects.filter(claimed_by=None, is_public=False, is_archived=False)
-
+    
     return render(request, 'reports/invited.html', {
         "user": user,
-        "invited_to": invited_to,
-        "reported": reported,
-        "subscribed": subscribed,
-        "open_and_claimed": open_and_claimed,
-        "unclaimed_reports": unclaimed_reports,
-        "reported_querystring": reported_querystring
+        "reported_querystring": user.get_reported_querystring,
+        "invited_to": user.get_invited,
+        "reported": user.get_reported,
+        "subscribed": user.get_subscriptions,
+        "open_and_claimed": user.get_open_and_claimed,
+        "unclaimed_reports": user.get_unclaimed
     })

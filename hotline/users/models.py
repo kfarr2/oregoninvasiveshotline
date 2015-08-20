@@ -1,9 +1,11 @@
 from urllib.parse import urlencode
 
 from django.contrib.auth.models import AbstractBaseUser, UserManager
+from django.contrib.sessions.models import Session
 from django.core.signing import Signer
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models import Q
 
 
 class User(AbstractBaseUser):
@@ -79,5 +81,36 @@ class User(AbstractBaseUser):
         """
         return self.is_staff
 
+    # Methods for dealing with reports in tabs.
+    @property
+    def get_reported(self):
+        from hotline.reports.models import Report
+        return Report.objects.filter(Q(created_by_id=self.pk))
+        #Q(pk__in=Session.get("report_ids", [])) |
+
+    @property
+    def get_reported_querystring(self):
+        return "created_by_id:(%s)" % (" ".join(map(str, set(self.get_reported.values_list("created_by_id", flat=True)))))
+
+
+    @property
+    def get_invited(self):
+        from hotline.reports.models import Invite
+        return [invite.report for invite in Invite.objects.filter(user_id=self.pk).select_related("report")]
+
+    @property
+    def get_open_and_claimed(self):
+        from hotline.reports.models import Report
+        return Report.objects.filter(claimed_by_id=self.pk, is_public=False, is_archived=False).exclude(claimed_by=None)
+
+    @property
+    def get_unclaimed(self):
+        from hotline.reports.models import Report
+        return Report.objects.filter(claimed_by=None, is_public=False, is_archived=False)
+
+    @property
+    def get_subscriptions(self):
+        from hotline.notifications.models import UserNotificationQuery
+        return UserNotificationQuery.objects.filter(user=self)
 
 from .indexes import *  # noqa isort:skip
