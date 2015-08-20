@@ -1,11 +1,9 @@
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 
 from hotline.perms import permissions
-from hotline.reports.models import Invite, Report
 
 from .forms import UserNotificationQueryForm, UserSubscriptionDeleteForm
 from .models import UserNotificationQuery

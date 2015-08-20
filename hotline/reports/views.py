@@ -17,7 +17,6 @@ from hotline.comments.models import Comment
 from hotline.comments.perms import can_create_comment
 from hotline.images.forms import get_image_formset
 from hotline.images.models import Image
-from hotline.notifications.models import UserNotificationQuery
 from hotline.species.models import category_id_to_species_id_json
 
 from .forms import (
@@ -292,7 +291,6 @@ def unclaim(request, report_id):
 
 def invited(request):
     user = request.user
-    
     return render(request, 'reports/invited.html', {
         "user": user,
         "reported_querystring": user.get_reported_querystring if not user.is_anonymous() else None,

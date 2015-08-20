@@ -4,14 +4,11 @@ from arcutils import will_be_deleted_with
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login as django_login
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import login as django_login_view
 from django.core.signing import BadSignature
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import DetailView
 
-from hotline.notifications.models import UserNotificationQuery
 from hotline.reports.models import Invite, Report
 
 from .forms import LoginForm, UserForm, UserSearchForm
@@ -81,6 +78,7 @@ def avatar(request, user_id, colors="AliceBlue AntiqueWhite Aqua Aquamarine Azur
         "text_color": text_color,
     }, content_type="image/svg+xml")
 
+
 def home(request):
     """
     Just redirect to the detail view for the user. This page exists solely
@@ -92,11 +90,13 @@ def home(request):
         messages.error(request, "Error: Not Logged In.")
         return redirect("home")
 
+    reported = Report.objects.filter(Q(pk__in=request.session.get("report_ids", [])) | Q(created_by_id=user.pk))
+
     return render(request, "users/home.html", {
         "user": user,
         "reported_querystring": user.get_reported_querystring if not user.is_anonymous() else None,
         "invited_to": user.get_invited if not user.is_anonymous() else None,
-        "reported": user.get_reported if not user.is_anonymous() else None,
+        "reported": reported,
         "subscribed": user.get_subscriptions if not user.is_anonymous() else None,
         "open_and_claimed": user.get_open_and_claimed if not user.is_anonymous() else None,
         "unclaimed_reports": user.get_unclaimed if not user.is_anonymous() else None

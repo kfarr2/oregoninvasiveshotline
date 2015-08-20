@@ -1,7 +1,6 @@
 from urllib.parse import urlencode
 
 from django.contrib.auth.models import AbstractBaseUser, UserManager
-from django.contrib.sessions.models import Session
 from django.core.signing import Signer
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -83,15 +82,16 @@ class User(AbstractBaseUser):
 
     # Methods for dealing with reports in tabs.
     @property
-    def get_reported(self):
+    def get_reported(self, request=None):
         from hotline.reports.models import Report
-        return Report.objects.filter(Q(created_by_id=self.pk))
-        #Q(pk__in=Session.get("report_ids", [])) |
+        if not request:
+            return Report.objects.filter(Q(created_by_id=self.pk))
+        else:
+            return Report.objects.filter(Q(pk__in=request.session.get("report_ids", [])) | Q(created_by_id=self.pk))
 
     @property
     def get_reported_querystring(self):
         return "created_by_id:(%s)" % (" ".join(map(str, set(self.get_reported.values_list("created_by_id", flat=True)))))
-
 
     @property
     def get_invited(self):
