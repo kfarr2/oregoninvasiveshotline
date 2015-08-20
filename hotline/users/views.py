@@ -91,10 +91,11 @@ def home(request):
         return redirect("home")
 
     reported = Report.objects.filter(Q(pk__in=request.session.get("report_ids", [])) | Q(created_by_id=user.pk))
+    reported_querystring = "created_by_id:(%s)" % (" ".join(map(str, set(reported.values_list("created_by_id", flat=True)))))
 
     return render(request, "users/home.html", {
         "user": user,
-        "reported_querystring": user.get_reported_querystring if not user.is_anonymous() else None,
+        "reported_querystring": reported_querystring,
         "invited_to": user.get_invited if not user.is_anonymous() else None,
         "reported": reported,
         "subscribed": user.get_subscriptions if not user.is_anonymous() else None,

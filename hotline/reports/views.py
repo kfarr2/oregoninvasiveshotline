@@ -52,14 +52,17 @@ def list_(request):
     for report in reports:
         reports_json.append(report.to_json())
 
+    reported = Report.objects.filter(Q(pk__in=request.session.get("report_ids", [])) | Q(created_by_id=user.pk))
+    reported_querystring = "created_by_id:(%s)" % (" ".join(map(str, set(reported.values_list("created_by_id", flat=True)))))
+
     return render(request, template, {
         "reports": reports,
         "form": form,
         "reports_json": json.dumps(reports_json),
         "tab": tab,
         "invited_to": user.get_invited if not user.is_anonymous() else None,
-        "reported": user.get_reported if not user.is_anonymous() else None,
-        "reported_querystring": user.get_reported_querystring if not user.is_anonymous() else None,
+        "reported": reported,
+        "reported_querystring": reported_querystring,
         "subscribed": user.get_subscriptions if not user.is_anonymous() else None,
         "open_and_claimed": user.get_open_and_claimed if not user.is_anonymous() else None,
         "unclaimed_reports": user.get_unclaimed if not user.is_anonymous() else None
@@ -291,11 +294,13 @@ def unclaim(request, report_id):
 
 def invited(request):
     user = request.user
+    reported = Report.objects.filter(Q(pk__in=request.session.get("report_ids", [])) | Q(created_by_id=user.pk))
+    reported_querystring = "created_by_id:(%s)" % (" ".join(map(str, set(reported.values_list("created_by_id", flat=True)))))
     return render(request, 'reports/invited.html', {
         "user": user,
-        "reported_querystring": user.get_reported_querystring if not user.is_anonymous() else None,
+        "reported_querystring": reported_querystring,
         "invited_to": user.get_invited if not user.is_anonymous() else None,
-        "reported": user.get_reported if not user.is_anonymous() else None,
+        "reported": reported,
         "subscribed": user.get_subscriptions if not user.is_anonymous() else None,
         "open_and_claimed": user.get_open_and_claimed if not user.is_anonymous() else None,
         "unclaimed_reports": user.get_unclaimed if not user.is_anonymous() else None
