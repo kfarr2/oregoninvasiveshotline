@@ -89,7 +89,7 @@ def home(request):
     """
     user = request.user
     if user.is_anonymous() and not request.session.get('report_ids'):
-        messages.error(request, "You are not allowed to be here")
+        messages.error(request, "Error: Not Logged In.")
         return redirect("home")
 
     invited_to = [invite.report for invite in Invite.objects.filter(user_id=user.pk).select_related("report")]

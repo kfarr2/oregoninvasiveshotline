@@ -57,6 +57,9 @@ We need to load the permissions template library so we can access the permission
                             <li><a href="{% url 'users-home' %}">Profile</a></li>
                             <li><a href="{% url 'users-edit' user.pk %}">Edit Profile</a></li>
                             <li><a href="{% url 'password_change' %}">Change Password</a></li>
+                            {% if user.is_staff %}
+                              <li><a href="{% url 'admin-panel' %}">Admin</a></li>
+                            {% endif %}
                             <li><a href="{% url 'logout' %}">Logout</a></li>
                           </ul>
                         </div>

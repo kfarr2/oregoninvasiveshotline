@@ -16,7 +16,10 @@ Account Home
             <img src="{{ user.get_avatar_url }}" class="img-responsive" />
         </div>
         <div class="panel panel-default">
-            <div class="panel-body">Profile</div>
+            <div class="panel-body">Profile
+                <a href="{% url 'users-edit' user.pk %}" class="btn btn-default btn-xs pull-right"><span class="glyphicon glyphicon-pencil"></span></a>
+            
+            </div>
             <ul class="list-group">
                 {% if user.is_active %}
                     <li class="list-group-item text-right"><strong class="pull-left">Email</strong> {{ user.email }}</li>
@@ -31,24 +34,17 @@ Account Home
     <div class="col-md-9">
         <h2>Hello, {{ user.prefix }} {{ user.first_name }} {{ user.last_name }} {{ user.suffix }}</h2>
         <hr />
-        {% if user.biography %}
-            <p><strong>Biography:</strong> {{ user.biography|linebreaksbr }}</p>
-        {% endif %}
-        {% if user.affiliations %}
-            <p><strong>Affiliations:</strong> {{ user.affiliations|linebreaksbr }}</p>
-        {% endif %}
         <div class="panel panel-default">
-            <div class="panel-heading"><h3 class="panel-title">Reports</h3></div>
+            <div class="panel-heading"><h3 class="panel-title">Reports & Subscribed Searches</h3></div>
             <div class="panel-body">
-                <h3>Any reports affiliated with you are shown below.</h3>
                 <p>This includes all subscribed and invited reports. All other reports can be found
                 via the tabs above.</p>
             {% if subscribed %}
                 <table class="table table-striped">
-                    <tr><th>You have subscribed to {{ subscribed|length }} report(s)!</th></tr>
-                    {% for report in subscribed %}
+                    <tr><th>You have subscribed to {{ subscribed|length }} searches(s)!</th></tr>
+                    {% for search in subscribed %}
                         <tr>
-                            <td><a href="{% url 'reports-detail' report.pk %}">{{ report.species|default:report }}</a> on {{ report.created_on }}</td>
+                            <td><a href="{% url 'reports-list' %}?{{ search.query }}">{{ search.name }}</a> on {{ search.created_on }}</td>
                         </tr>
                     {% endfor %}
                 </table>
@@ -66,6 +62,14 @@ Account Home
                 </table>
             {% endif %}
             </div>
+        </div>
+        <div class="well">
+            {% if user.biography %}
+                <p><strong>Biography:</strong> {{ user.biography|linebreaksbr }}</p>
+            {% endif %}
+            {% if user.affiliations %}
+                <p><strong>Affiliations:</strong> {{ user.affiliations|linebreaksbr }}</p>
+            {% endif %}
         </div>
     </div>
 </div>
