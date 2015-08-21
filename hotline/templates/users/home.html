@@ -46,10 +46,10 @@ Account Home
             {% if user.is_authenticated %}
                 {% if subscribed %}
                     <table class="table table-striped">
-                        <tr><th>You have subscribed to {{ subscribed|length }} report(s)!</th></tr>
-                        {% for report in subscribed %}
+                        <tr><th>You have subscribed to {{ subscribed|length }} search(es)!</th></tr>
+                        {% for search in subscribed %}
                             <tr>
-                                <td><a href="{% url 'reports-detail' report.pk %}">{{ report.species|default:report }}</a> on {{ report.created_on }}</td>
+                                <td><a href="{% url 'reports-list' %}?{{ search.query }}">{{ search }}</a> on {{ search.created_on }}</td>
                             </tr>
                         {% endfor %}
                     </table>
