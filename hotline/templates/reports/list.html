@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/report-list.css' %}" />
+{% endblock %}
 {% block title %}
 Report List
 {% endblock %}
@@ -23,57 +26,67 @@ Report List
             </div>
             <br />
             {% if reports %}
-                <div id="map-canvas" style="height:550px"></div>
-                <p class="pull-right reports-table-subscribe">
-                    <a href="{% url 'notifications-create' %}?{{ request.GET.urlencode }}">Subscribe to this search</a>
-                    | Export: <a href="{% add_get export="csv" %}">CSV</a>,
-                    <a href="{% add_get export="kml" %}">KML</a>
-                </p>
-                <p class="reports-table-sort comma-list">Sort By:
-                    {% for subwidget in form.sort_by %}
-                        <span class="comma"><a class="{% if subwidget.choice_value == form.cleaned_data.sort_by %}strong{% endif %}" href="{% add_get sort_by=subwidget.choice_value %}">{{ subwidget.choice_label }}</a></span>
-                    {% endfor %}
-                    <div class="hidden">{{ form.sort_by }}</div>
-                </p>
-                <table class="table reports-table double-zebra">
-                    <tbody>
-                        {% for report in reports %}
-                            <tr>
-                                <td rowspan="2" class="reports-table-img">
-                                    <a href="#map-canvas" class="report-location-click" data-report-index="{{ forloop.counter0 }}">
-                                        <img src="{{ report.image_url|default:report.icon_url }}" />
-                                    </a>
-                                </td>
-                                <td colspan="4" class="reports-table-title">
-                                    <a href="{% url 'reports-detail' report.pk %}">
-                                        <small>#{{ report.pk }}:</small>
-                                        {{ report.species.name|default:report.category }}
-                                    </a>
-                                    {% if report.species %}
-                                        <small>({{ report.category }})</small>
-                                    {% endif %}
-                                <div class="pull-right" style="font-size:18px">
-                                    {% if report.is_public %}
-                                        <span class="glyphicon glyphicon-eye-open" title="Public"></span>
-                                    {% endif %}
-                                    {% if report.actual_species %}
-                                        <span class="glyphicon glyphicon-ok" title="Confirmed"></span>
-                                    {% endif %}
-                                    {% if report.is_archived %}
-                                        <span class="glyphicon glyphicon-oil" title="Archived"></span>
-                                    {% endif %}
-                                </div>
-                            </tr>
-                            <tr>
-                                <td><em>Reported On:</em> {{ report.created_on|date:"M j, Y" }}</td>
-                                <td><em>Region:</em> {{ report.county|default:"?" }}</td>
-                                <td><em title="Early Detection and Rapid Response">EDRR Status:</em> {{ report.get_edrr_status_display|default:"None" }}</td>
-                                <td class="text-right"><em>Claimed By:</em> {% if report.claimed_by_id == user.pk %}<strong class="text-success">YOU</strong>{% else %}{{ report.claimed_by|default:"Nobody" }}{% endif %}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% include '_pagination.html' with items=reports %}
+                <div id="map-container">
+                    <div id="map-canvas" style="height:550px"></div>
+                    <div id="menu-button" class="white"><span class="glyphicon glyphicon-menu-hamburger"></span></div>
+                    <div id="report-list">
+                        <span id="menu-close-button" class="glyphicon glyphicon-remove white pull-right"></span>
+                        <h3>Reports</h3>
+                        <div id="report-table-container">
+                            <p class="pull-right reports-table-subscribe">
+                                <a href="{% url 'notifications-create' %}?{{ request.GET.urlencode }}">Subscribe to this search</a>
+                                <br />
+                                Export: <a href="{% add_get export="csv" %}">CSV</a>,
+                                <a href="{% add_get export="kml" %}">KML</a>
+                            </p>
+                            <p class="reports-table-sort comma-list">Sort By:
+                                {% for subwidget in form.sort_by %}
+                                    <span class="comma"><a class="{% if subwidget.choice_value == form.cleaned_data.sort_by %}strong{% endif %}" href="{% add_get sort_by=subwidget.choice_value %}">{{ subwidget.choice_label }}</a></span>
+                                {% endfor %}
+                                <div class="hidden">{{ form.sort_by }}</div>
+                            </p>
+                            <table class="table reports-table double-zebra">
+                                <tbody>
+                                    {% for report in reports %}
+                                        <tr>
+                                            <td rowspan="2" class="reports-table-img">
+                                                <a href="#map-canvas" class="report-location-click" data-report-index="{{ forloop.counter0 }}">
+                                                    <img src="{{ report.image_url|default:report.icon_url }}" />
+                                                </a>
+                                            </td>
+                                            <td colspan="4" class="reports-table-title">
+                                                <a href="{% url 'reports-detail' report.pk %}">
+                                                    <small>#{{ report.pk }}:</small>
+                                                    {{ report.species.name|default:report.category }}
+                                                </a>
+                                                {% if report.species %}
+                                                    <small>({{ report.category }})</small>
+                                                {% endif %}
+                                            <div class="pull-right" style="font-size:18px">
+                                                {% if report.is_public %}
+                                                    <span class="glyphicon glyphicon-eye-open" title="Public"></span>
+                                                {% endif %}
+                                                {% if report.actual_species %}
+                                                    <span class="glyphicon glyphicon-ok" title="Confirmed"></span>
+                                                {% endif %}
+                                                {% if report.is_archived %}
+                                                    <span class="glyphicon glyphicon-oil" title="Archived"></span>
+                                                {% endif %}
+                                            </div>
+                                        </tr>
+                                        <tr>
+                                            <td><em>Reported On:</em> {{ report.created_on|date:"M j, Y" }}</td>
+                                            <td><em>Region:</em> {{ report.county|default:"?" }}</td>
+                                            <td><em title="Early Detection and Rapid Response">EDRR Status:</em> {{ report.get_edrr_status_display|default:"None" }}</td>
+                                            <td class="text-right"><em>Claimed By:</em> {% if report.claimed_by_id == user.pk %}<strong class="text-success">YOU</strong>{% else %}{{ report.claimed_by|default:"Nobody" }}{% endif %}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% include '_pagination.html' with items=reports %}
+                        </div>
+                    </div>
+                </div>
             {% else %}
                 <div class="alert alert-warning">No matching reports found!</div>
             {% endif %}
@@ -81,4 +94,5 @@ Report List
         {% include 'reports/_list_map.html' with reports_json=reports_json %}
     </div>
 </div>
+<script src="{% static 'js/report-list.js' %}"></script>
 {% endblock %}

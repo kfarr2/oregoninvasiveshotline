@@ -41,6 +41,15 @@ google.maps.event.addDomListener(window, 'load', function(){;
                     windows[i].close()
                 }
                 infowindow.open(map, marker);
+
+                // if the reports list is in the way, offset the center so that when
+                // the user clicks on the icon, the map will center on the report location,
+                // but won't cover it up.
+                var position = marker.getPosition();
+                var pos_x = position.lng();
+                if(!$("#report-list").is(":hidden"))
+                  pos_x = position.lng() + 2;
+                map.setCenter({ lat: position.lat(), lng: pos_x });
             });
         }
     }
@@ -48,7 +57,7 @@ google.maps.event.addDomListener(window, 'load', function(){;
     $('.report-location-click').click(function(){
         var index = $(this).data("report-index");
         google.maps.event.trigger(reports[index].marker, 'click');
-
     })
+
 })
 </script>

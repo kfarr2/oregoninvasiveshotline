@@ -1,0 +1,72 @@
+#map-container {
+  position: relative;
+  overflow: hidden;
+}
+
+#map-canvas {
+  z-index: 1;
+  overflow: hidden;
+}
+
+#menu-button {
+  position: absolute;
+  top: 2em;
+  z-index: 3;
+  background-color: #333;
+  padding: 1em;
+  right: 0;
+  opacity: 0.9;
+  border-top-left-radius: 0.5em;
+  border-bottom-left-radius: 0.5em;
+  cursor: pointer;
+}
+
+#menu-close-button {
+  top: 2em;
+  cursor: pointer;
+}
+
+#report-list {
+  position: absolute;
+  display: none;
+  top: 0em;
+  bottom: 0em;
+  width: 500px;
+  max-height: 100%;
+  z-index: 2;
+  background-color: #333;
+  padding: 1em;
+  right: -500px;
+  opacity: 0.9;
+  overflow-y: hidden;
+}
+
+@media screen and (max-width: 1000px){
+  #report-list {
+    width: 100%;
+    right: -100%;
+  }
+}
+
+#report-list h3 {
+  color: #fff;
+}
+
+#report-table-container {
+  position: relative;
+  opacity: 1;
+  background-color: #fff;
+  border-radius: 0.25em;
+  padding: 1em;
+  margin-bottom: 2em;
+  height: 90%;
+  overflow-y: hidden;
+}
+
+.reports-table > tbody {
+  overflow-y: scroll;
+}
+
+.white {
+  color: #fff;
+}

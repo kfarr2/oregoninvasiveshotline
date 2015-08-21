@@ -460,9 +460,9 @@ blockquote {
 
 .reports-table tbody {
     display:block !important;
-    overflow-y:auto;
+    overflow-y:scroll;
     overflow-x:hidden;
-    height:500px;
+    margin: auto;
 }
 
 .reports-table .reports-table-title {
