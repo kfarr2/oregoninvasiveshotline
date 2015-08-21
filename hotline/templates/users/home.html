@@ -9,7 +9,7 @@ Account Home
     {% endif %}
     <a href="{% url 'logout' %}">Logout</a>
 </div>
-{% include "nav_tabs.html" with active="home" %}
+{% if user.is_authenticated %}{% include "nav_tabs.html" with active="home" %}{% endif %}
 <div class="tab-content">
     <div id="avatar_box" class="col-md-3">
         <div id="avatar-image">
@@ -22,14 +22,14 @@ Account Home
                     <li class="list-group-item text-right"><strong class="pull-left">Email</strong> {{ user.email }}</li>
                     <li class="list-group-item text-right"><strong class="pull-left">Active</strong> {{ user.is_active }}</li>
                     <li class="list-group-item text-right"><strong class="pull-left">Staff</strong> {{ user.is_staff }}</li>
+                    <li class="list-group-item text-right"><strong class="pull-left">Joined</strong> {{ user.date_joined|date:"E d, Y" }}</li>
                 {% endif %}
-                <li class="list-group-item text-right"><strong class="pull-left">Joined</strong> {{ user.date_joined|date:"E d, Y" }}</li>
             </ul>
         </div>
     </div>
 
     <div class="col-md-9">
-        <h2>Hello, {{ user.prefix }} {{ user.first_name }} {{ user.last_name }} {{ user.suffix }}</h2>
+        <h2>Hello, {% if user.is_authenticated %}{{ user.prefix }} {{ user.first_name }} {{ user.last_name }} {{ user.suffix }}{% else %} and welcome to the Oregon Invasive Species Hotline.{% endif %}</h2>
         <hr />
         {% if user.biography %}
             <p><strong>Biography:</strong> {{ user.biography|linebreaksbr }}</p>
@@ -43,27 +43,40 @@ Account Home
                 <h3>Any reports affiliated with you are shown below.</h3>
                 <p>This includes all subscribed and invited reports. All other reports can be found
                 via the tabs above.</p>
-            {% if subscribed %}
-                <table class="table table-striped">
-                    <tr><th>You have subscribed to {{ subscribed|length }} report(s)!</th></tr>
-                    {% for report in subscribed %}
-                        <tr>
-                            <td><a href="{% url 'reports-detail' report.pk %}">{{ report.species|default:report }}</a> on {{ report.created_on }}</td>
-                        </tr>
-                    {% endfor %}
-                </table>
+            {% if user.is_authenticated %}
+                {% if subscribed %}
+                    <table class="table table-striped">
+                        <tr><th>You have subscribed to {{ subscribed|length }} report(s)!</th></tr>
+                        {% for report in subscribed %}
+                            <tr>
+                                <td><a href="{% url 'reports-detail' report.pk %}">{{ report.species|default:report }}</a> on {{ report.created_on }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
 
-            {% endif %}
-            {% if invited_to %}
-                <table class="table table-striped">
-                    <tr><th>You have been invited to review {{ invited_to|length }}
-                            report(s)!</th></tr>
-                    {% for report in invited_to %}
-                        <tr>
-                            <td><a href="{% url 'reports-detail' report.pk %}">{{ report.species|default:report.category }}</a> on {{ report.created_on }}</td>
-                        </tr>
-                    {% endfor %}
-                </table>
+                {% endif %}
+                {% if invited_to %}
+                    <table class="table table-striped">
+                        <tr><th>You have been invited to review {{ invited_to|length }}
+                                report(s)!</th></tr>
+                        {% for report in invited_to %}
+                            <tr>
+                                <td><a href="{% url 'reports-detail' report.pk %}">{{ report.species|default:report.category }}</a> on {{ report.created_on }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            {% else %}
+                {% if reported %}
+                    <table class="table table-striped">
+                        <tr><th>You are affiliated with {{ reported|length }} report(s)!</th></tr>
+                        {% for report in reported %}
+                            <tr>
+                                <td><a href="{% url 'reports-detail' report.pk %}">{{ report.species|default:report }}</a> on {{ report.created_on }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
             {% endif %}
             </div>
         </div>
