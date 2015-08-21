@@ -79,7 +79,7 @@ We need to load the permissions template library so we can access the permission
                 {% block content %}{% endblock %}
             </div>
 
-            <div class="container text-center text-muted" id="footer">
+            <div class="{% block footer_class %}container{% endblock %} text-center text-muted" id="footer">
                 <h6>Copyright &copy; {% now "Y" %}</h6>
             </div>
         </div>

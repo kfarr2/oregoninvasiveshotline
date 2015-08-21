@@ -36,6 +36,11 @@ small {
     content:""
 }
 
+.container-fluid {
+  background-color: #fff;
+  border-radius: 0;
+}
+
 .strong {
     font-weight:bold;
 }

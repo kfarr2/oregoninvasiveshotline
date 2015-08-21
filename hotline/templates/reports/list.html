@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% block main_class %}container-fluid{% endblock %}
+{% block footer_class %}container-fluid{% endblock %}
 {% block head %}
     <link rel="stylesheet" href="{% static 'css/report-list.css' %}" />
 {% endblock %}
@@ -6,7 +8,7 @@
 Report List
 {% endblock %}
 {% block content %}
-{% include "nav_tabs.html" with tab=tab %}
+<div class="container">{% include "nav_tabs.html" with tab=tab %}</div>
 <div class="tab-content">
     <div class="tab-pane active" id="{{ tab }}">
         <form class="reports-table-form">
