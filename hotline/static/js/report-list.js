@@ -13,9 +13,11 @@ $("#menu-button").click(function(e){
     $("#report-list").show();
     $("#report-list").animate({ "right": "0"}, "fast");
     $("#report-list").promise().done(function(){
+      // Dynamically shove that damn table into the right place.
       var _top = $(".reports-table").position();
       var _pages = $(".step-links").parent().height();
-      var height = $("#report-table-container").height() - _pages - _top.top;
+      // You had better fit this time or so help me.
+      var height = $("#report-table-container").height() - _pages - _top.top - 10;
       $(".reports-table").children().css({"height": height + "px"});
     });
   });

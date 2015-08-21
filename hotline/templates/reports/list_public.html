@@ -16,7 +16,7 @@ Report List
     </div>
 </form>
 <div class="row">
-    <div class="col-md-7">
+    <div class="col-md-12">
         <br />
         {% if reports %}
                 <div id="map-container">
@@ -26,7 +26,7 @@ Report List
                         <span id="menu-close-button" class="glyphicon glyphicon-remove white pull-right"></span>
                         <h3>Reports</h3>
                         <div id="report-table-container">
-                            <div class="col-md-5 {% if not reports %}hidden{% endif %}">
+                            <div class="col-md-12 {% if not reports %}hidden{% endif %}">
                                 <p class="reports-table-sort comma-list">Sort By:
                                     {% for subwidget in form.sort_by %}
                                         <span class="comma"><a class="{% if subwidget.choice_value == form.cleaned_data.sort_by %}strong{% endif %}" href="{% add_get sort_by=subwidget.choice_value %}">{{ subwidget.choice_label }}</a></span>
