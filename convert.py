@@ -14,7 +14,7 @@ It assumes your DATABASES setting has this in it
     },
 """
 import urllib.parse
-import os
+import os, sys
 from collections import defaultdict
 import subprocess
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hotline.settings")
@@ -35,8 +35,25 @@ from hotline.reports.models import Report
 from hotline.species.models import Species
 from hotline.users.models import User
 
-
-old = connections['old'].cursor()
+try:
+    if 'old' in connections:
+        old = connections['old'].cursor()
+    else:
+        raise(KeyError)
+except KeyError:
+    settings = """
+    'old': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'invhotline',
+        'USER': 'username',
+        'PASSWORD': 'password',
+        'HOST': 'pgsql.rc.pdx.edu',
+        'PORT': '',
+    },
+    """
+    message = "\nError: Old database connection not found. You need this to import the old site.\
+    \nDid you remember to add the credentials to your DB settings?\n" + settings
+    sys.exit(message)
 
 # the severity ID and category IDs are assumed to be the same, so we aren't
 # importing those
