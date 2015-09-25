@@ -1,55 +1,26 @@
-.PHONY: run install clean coverage reload
+.PHONY = init clean test run
 
-PROJECT_NAME = hotline
-VENV_DIR ?= .env
-# centos puts pg_config in weird places. We run postgres 9.1 and 9.3 in prod and dev
-# respectively.
-PG_DIRS = /usr/pgsql-9.1/bin:/usr/pgsql-9.3/bin
+.DEFAULT_GOAL = run
 
-PYTHON = python3
-MANAGE = python manage.py
-HOST ?= 0.0.0.0
-PORT ?= 8000
-
-export PATH:=$(VENV_DIR)/bin:$(PATH):$(PG_DIRS)
-
-run:
-	$(MANAGE) runserver $(HOST):$(PORT)
+venv ?= .env
+venv_python ?= python3
+bin = $(venv)/bin
 
 init:
-	rm -rf $(VENV_DIR)
-	@$(MAKE) $(VENV_DIR)
-	dropdb --if-exists $(PROJECT_NAME)
-	createdb $(PROJECT_NAME)
-	psql -c "CREATE EXTENSION postgis" $(PROJECT_NAME)
-	@$(MAKE) reload
-	$(MANAGE) loaddata dummy_user.json category.json severity.json species.json counties.json pages.json
+	@if [ -d "$(venv)" ]; then echo "virtualenv $(venv) exists"; exit 1; fi
+	@virtualenv -p $(venv_python) $(venv)
+	@$(bin)/pip install -e git+https://github.com/PSU-OIT-ARC/arctasks#egg=psu.oit.arc.tasks
+	@$(bin)/inv init --overwrite
 
 clean:
-	find . -iname "*.pyc" -delete
-	find . -iname "*.pyo" -delete
-	find . -iname "__pycache__" -delete
-
-coverage:
-	coverage run ./manage.py test --keepdb && coverage html && cd htmlcov && python -m http.server 9000
+	@$(bin)/inv clean
 
 test:
-	LOCAL_SETTINGS_FILE="local.cfg#test" $(MANAGE) test --keepdb && flake8 && isort -rc --diff --check-only $(PROJECT_NAME)
+	@$(bin)/inv test
 
-reload:
-	$(MANAGE) migrate
-	$(MANAGE) collectstatic --noinput
-	$(MANAGE) rebuild_index --clopen --noinput
-	touch $(PROJECT_NAME)/wsgi.py
+run:
+	@$(bin)/inv runserver
 
-stage:
-	git fetch arc
-	@git diff arc/master HEAD
-	@read -p "Are you sure? [y/n] " foo && [ $$foo = "y" ]
-	git push arc master
-	ssh -tt hrimfaxi.oit.pdx.edu "cd /vol/www/invasivespecieshotline/dev && sudo bash -c 'git fetch && git checkout $$(git rev-parse HEAD) && make reload'"
-
-$(VENV_DIR):
-	$(PYTHON) -m venv .env
-	curl https://raw.githubusercontent.com/pypa/pip/master/contrib/get-pip.py | python
-	pip install -r requirements.txt
+to ?= stage
+deploy:
+	$(bin)/inv configure --env $(to) deploy

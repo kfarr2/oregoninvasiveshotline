@@ -1,6 +1,7 @@
 coverage==3.7.1
 Django==1.8.3
 git+https://github.com/PSU-OIT-ARC/django-arcutils.git#egg=django-arcutils
+-e git+https://github.com/PSU-OIT-ARC/arctasks#egg=psu.oit.arc.tasks
 django-cloak==1.0.0
 git+https://github.com/PSU-OIT-ARC/django-local-settings.git#egg=django_local_settings
 django-perms==1.2.1
