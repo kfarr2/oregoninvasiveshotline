@@ -14,7 +14,8 @@ It assumes your DATABASES setting has this in it
     },
 """
 import urllib.parse
-import os, sys
+import os
+import sys
 from collections import defaultdict
 import subprocess
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hotline.settings")
@@ -35,12 +36,9 @@ from hotline.reports.models import Report
 from hotline.species.models import Species
 from hotline.users.models import User
 
-try:
-    if 'old' in connections:
-        old = connections['old'].cursor()
-    else:
-        raise(KeyError)
-except KeyError:
+if 'old' in connections:
+    old = connections['old'].cursor()
+else:
     settings = """
     'old': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',

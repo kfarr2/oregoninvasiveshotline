@@ -11,7 +11,6 @@ init:
 	@virtualenv -p $(venv_python) $(venv)
 	@$(bin)/pip install -e git+https://github.com/PSU-OIT-ARC/arctasks#egg=psu.oit.arc.tasks
 	@$(bin)/inv init --overwrite
-	@$(bin)/python3 convert.py
 
 clean:
 	@$(bin)/inv clean

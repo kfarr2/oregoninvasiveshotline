@@ -14,3 +14,4 @@ def init(ctx, overwrite=False):
     manage(ctx, 'collectstatic --noinput')
     manage(ctx, 'loaddata dummy_user.json category.json severity.json species.json counties.json pages.json')
     manage(ctx, 'test')
+    local(ctx, '{python} convert.py')

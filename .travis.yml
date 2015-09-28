@@ -4,9 +4,10 @@ python:
 sudo: false
 # command to install dependencies
 install:
-  - make init
-# command to run tests
-script: make test
+  - pip install -r requirements.txt
+    # command to run tests
+script:
+  - LOCAL_SETTINGS_FILE="local.cfg#test" ./manage.py test
 services:
   - elasticsearch
 before_script:

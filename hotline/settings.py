@@ -103,7 +103,6 @@ DATABASES = {
         'PASSWORD': SecretSetting(),
         # the default is fine for dev
         'HOST': LocalSetting(''),
-        'PORT': '',
         'ATOMIC_REQUESTS': True,
     },
 }

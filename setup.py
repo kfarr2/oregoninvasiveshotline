@@ -6,7 +6,7 @@ VERSION = '1.0.0'
 install_requires = [
     'django',
     'git+https://github.com/PSU-OIT-ARC/django-arcutils.git#egg=django-arcutils',
-    '-e git+https://github.com/PSU-OIT-ARC/arctasks#egg=psu.oit.arc.tasks',
+    'git+https://github.com/PSU-OIT-ARC/arctasks#egg=psu.oit.arc.tasks',
     'django-cloak',
     'git+https://github.com/PSU-OIT-ARC/django-local-settings.git#egg=django_local_settings'
     'django-perms',
