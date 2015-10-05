@@ -1,18 +1,16 @@
 from setuptools import setup, find_packages
 
-VERSION = '1.0.0'
+VERSION = '1.0.0.dev0'
 
 
 install_requires = [
-    'django',
-    'git+https://github.com/PSU-OIT-ARC/django-arcutils.git#egg=django-arcutils',
-    'git+https://github.com/PSU-OIT-ARC/arctasks#egg=psu.oit.arc.tasks',
+    'django>=1.8.4,<1.9',
+    'django-arcutils>=1.1.1',
     'django-cloak',
-    'git+https://github.com/PSU-OIT-ARC/django-local-settings.git#egg=django_local_settings'
+    'django-local-settings>=1.0a7',
     'django-perms',
-    'git+https://github.com/PSU-OIT-ARC/elasticmodels.git#egg=elasticmodels',
+    'elasticmodels',
     'elasticsearch',
-    'elasticsearch-dsl',
     'Markdown',
     'mccabe',
     'mock',

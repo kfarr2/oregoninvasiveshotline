@@ -1,28 +1,4 @@
-coverage==3.7.1
-Django==1.8.3
-git+https://github.com/PSU-OIT-ARC/django-arcutils.git#egg=django-arcutils
--e git+https://github.com/PSU-OIT-ARC/arctasks#egg=psu.oit.arc.tasks
-django-cloak==1.0.0
-git+https://github.com/PSU-OIT-ARC/django-local-settings.git#egg=django_local_settings
-django-perms==1.2.1
+-f https://cdn.research.pdx.edu/pypi/dist/
+git+https://github.com/PSU-OIT-ARC/arctasks#egg=psu.oit.arc.tasks
 git+https://github.com/PSU-OIT-ARC/elasticmodels.git#egg=elasticmodels
-elasticsearch==1.6.0
-elasticsearch-dsl==0.0.4
-flake8==2.4.1
-isort==4.0.0
-Markdown==2.6.2
-mccabe==0.3.1
-mock==1.3.0
-model-mommy==1.2.5
-mommy-spatial-generators==0.1.2
-pbr==1.4.0
-pep8==1.5.7
-Pillow==2.9.0
-psycopg2==2.6.1
-pyflakes==0.8.1
-python-dateutil==2.4.2
-pytz==2015.4
-six==1.9.0
-stashward==0.1.4
-urllib3==1.11
-wheel==0.24.0
+-e .[dev]

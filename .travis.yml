@@ -1,14 +1,23 @@
 language: python
 python:
   - "3.3"
+
 sudo: false
 # command to install dependencies
 install:
   - pip install -r requirements.txt
     # command to run tests
 script:
-  - LOCAL_SETTINGS_FILE="local.cfg#test" ./manage.py test
+  - LOCAL_SETTINGS_FILE="local.cfg#test" python manage.py test
+
 services:
   - elasticsearch
+
 before_script:
   - sleep 10
+  - createdb hotline
+  - psql -c "CREATE EXTENSION postgis" hotline
+  - python manage.py migrate
+  - python manage.py collectstatic --noinput
+  - python manage.py rebuild_index --clopen --noinput
+  - python manage.py loaddata dummy_user.json category.json severity.json species.json counties.json pages.json
