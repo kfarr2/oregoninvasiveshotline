@@ -53,6 +53,7 @@ urlpatterns = patterns(
     url(r'^reports/help/?$', reports.help, name='reports-help'),
 
     url(r'^comments/edit/(?P<comment_id>\d+)/?$', comments.edit, name='comments-edit'),
+    url(r'^comments/delete/(?P<comment_id>\d+)/?$', comments.delete, name='comments-delete'),
 
     url(r'^notifications/create/?$', notifications.create, name='notifications-create'),
     url(r'^notifications/list/?$', notifications.list_, name='notifications-list'),
