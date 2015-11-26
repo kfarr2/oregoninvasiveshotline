@@ -17,8 +17,17 @@
         </div>
 
         {% include '_images.html' %}
-
-        <input type="hidden" name="submit_flag" value="{{ form.SUBMIT_FLAG }}" />
-        <input type="submit" value="Submit" name="submit" />
+        <div class="row">
+            <div class="col-md-10">
+                <input type="hidden" name="submit_flag" value="{{ form.SUBMIT_FLAG }}" />
+                <input type="submit" value="Submit" name="submit" />
+                <button id="cancel-comment" class="btn btn-warning">Cancel</button>
+            </div>
+            {% if comment.pk %}
+                <div class="col-md-2">
+                    <a href="{% url 'comments-delete' comment.pk %}" class="btn btn-danger pull-right">Delete</a>
+                </div>
+            {% endif %}
+        </div>
     </fieldset>
 </form>
