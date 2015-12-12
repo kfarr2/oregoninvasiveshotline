@@ -1,5 +1,7 @@
+import os, sys
 import hashlib
 import subprocess
+from PIL import Image
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -58,23 +60,19 @@ Site.objects.get_current = get_current
 
 
 def resize_image(input_path, output_path, width, height):
-    size = "%dx%d" % (width, height)
-    return subprocess.call([
-        "convert",
-        input_path,
-        "-thumbnail",
-        # the > below means don't enlarge images that fit in the box
-        size + ">",
-        "-background",
-        "transparent",
-        "-gravity",
-        "center",
-        # fill the box with the background color (which
-        # is transparent)
-        "-extent",
-        size,
-        output_path
-    ])
+    """
+    Takes the input_path, output_path, width and height,
+    opens, copies, resizes and saves the new image.
+    """
+    size = (width, height)
+    if input_path != output_path:
+        try:
+            img = Image.open(input_path)
+            img.thumbnail(size)
+            img.save(output_path)
+
+        except IOError as e:
+            print("cannot resize image at: ", input_path)
 
 
 def get_tab_counts(user, report_ids):
