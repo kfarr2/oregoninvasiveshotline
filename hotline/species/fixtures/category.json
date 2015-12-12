@@ -32,14 +32,6 @@
     "model": "species.category"
 },
 {
-    "pk": 5,
-    "fields": {
-        "icon": "icons/turtle.png",
-        "name": "Aquatic Vertebrates"
-    },
-    "model": "species.category"
-},
-{
     "pk": 6,
     "fields": {
         "icon": "icons/ant.png",

@@ -1,16 +1,9 @@
-<svg  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!--
-    This path makes a shape like:
-    ____
-    |  |
-    |  |
-     \/
-    -->
-    <!--<path d="m15,45 L0,30 L0,0 L30,0 L30,30 z" style="stroke: #000; fill: {{ color }}"/>-->
-    <path d="m 0,0 L0,30 L10,30 L15,45 L20,30 L30,30 L30,0 z" style="stroke: #000; fill: {{ color }}"/>
-    {% if img %}
-        <g transform="translate(-1 -9)">
-            <image width="32" height="37" xlink:href="data:image/png;base64,{{ img }}"/>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="30" height="45">
+    <path d="M0,0 H30 V30 H20 L15,45 L10,30 H0 Z" fill="{{ color }}" />
+    {% if image_data %}
+        <g fill="none" transform="translate(-1 -11)">
+            <image xlink:href="data:image/png;base64,{{ image_data }}" width="32" height="37" />
         </g>
     {% endif %}
 </svg>

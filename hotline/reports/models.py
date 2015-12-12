@@ -1,7 +1,9 @@
 import base64
 import hashlib
 import itertools
+import logging
 import os
+import posixpath
 import subprocess
 import tempfile
 
@@ -14,6 +16,9 @@ from django.template import Context
 from django.template.loader import get_template, render_to_string
 
 from hotline.utils import resize_image
+
+
+log = logging.getLogger(__name__)
 
 
 class Report(models.Model):
@@ -78,11 +83,11 @@ class Report(models.Model):
         return self.category.name
 
     def to_json(self):
-        image_url = self.image_url()
+        image_url = self.image_url
         return {
             "lat": self.point.y,
             "lng": self.point.x,
-            "icon": self.icon_url(),
+            "icon": self.icon_url,
             "title": str(self),
             "image_url": image_url,
             "content": self.__class__.TEMPLATE.render(Context({
@@ -91,47 +96,97 @@ class Report(models.Model):
             })),
         }
 
-    def icon_url(self):
-        """
-        This view generates on the fly a PNG image from a SVG, which can be used as
-        an icon on the Google map. The reason for this SVG to PNG business is that
-        SVGs are easily customized, but not all browsers support SVG on Google
-        maps, so we convert the SVG to a PNG.
+    @property
+    def icon_color(self):
+        return '#999' if self.species is None else self.species.severity.color
 
-        The icon is composed of a background color based on the specie's severity,
-        and an image from the specie's category.
+    @property
+    def icon_rel_path(self):
+        """Generate relative icon path.
 
-        If you are going to change the design or size of the icon, you will need to
-        update `hotline/static/js/main.js:generateIcon` as well
+        This path can be joined to ``MEDIA_ROOT`` or ``MEDIA_URL``.
+
+        Generally, you'd use :meth:`icon_path` or :meth:`icon_url`
+        instead of this.
+
         """
-        # TODO caching so we don't hit the filesystem all the time
         category = self.category
-        # figure out which color to use for the background
-        color = "#999" if self.species is None else self.species.severity.color
-        icon_size = "30x45"
-        # the file path for the generated icon will be based on the parameters that
-        # can change the appearance of the map icon
-        key = hashlib.md5("|".join(map(str, [category.icon.path if category.icon else "", color])).encode("utf8")).hexdigest()
-        icon_location = os.path.join(settings.MEDIA_ROOT, "generated_icons", key + ".png")
-        # if the PNG doesn't exist, create it
-        if not os.path.exists(icon_location):
-            with tempfile.NamedTemporaryFile("wt", suffix=".svg") as f:
-                if category.icon and os.path.exists(category.icon.path):
-                    with open(category.icon.path, 'rb') as icon_fp:
-                        img = base64.b64encode(icon_fp.read())
+        key_parts = [category.icon.path if category.icon else '', self.icon_color]
+        key = '|'.join(str(p) for p in key_parts)
+        key = hashlib.md5(key.encode('utf-8')).hexdigest()
+        path = os.path.join('generated_icons', '%s.png' % key)
+        return path
+
+    @property
+    def icon_path(self):
+        """Path to (generated) icon for this report."""
+        return os.path.join(settings.MEDIA_ROOT, self.icon_rel_path)
+
+    @property
+    def icon_url(self):
+        """Get icon URL for this report.
+
+        The icon is composed of a background color based on the species'
+        severity and an image from the species' category. If the icon
+        doesn't exist on disk, it will be created.
+
+        If you are going to change the design or size of the icon, you
+        will need to update the ``generateIcon`` function in
+        ``static/js/main.js`` also.
+
+        """
+        # XXX: It seems a little weird to generate the icon here.
+        self.generate_icon()
+        return posixpath.join(settings.MEDIA_URL, self.icon_rel_path)
+
+    def generate_icon(self):
+        """Generate icon for this report.
+
+        The file path for the generated icon is based on parameters that
+        will change the appearance of the icon. This ensures the icon is
+        updated if the report's category changes.
+
+        """
+        if not os.path.exists(self.icon_path):
+            icon = self.category.icon
+            color = self.icon_color
+
+            # XXX: This shouldn't be hard coded
+            generated_icon_size = '30x45'
+
+            # Note: We create an SVG because SVGs are easy to customize
+            #       then convert the SVG to PNG for browser compat.
+            with tempfile.NamedTemporaryFile('wt', suffix='.svg') as svg_fp:
+                if icon and os.path.exists(icon.path):
+                    with open(icon.path, 'rb') as icon_fp:
+                        image_data = base64.b64encode(icon_fp.read())
                 else:
-                    img = None
-                f.write(render_to_string("reports/icon.svg", {
-                    # we encode the category PNG inside the SVG, to avoid file path
-                    # problems that come from generating the PNG from imagemagick
-                    "img":  img,
-                    "color": color
+                    # Icon won't have a category image if the category
+                    # doesn't have an icon.
+                    image_data = None
+                svg_fp.write(render_to_string('reports/icon.svg', {
+                    'color': color,
+                    'image_data':  image_data,
                 }))
-                f.flush()
-                subprocess.call(["convert", "-background", "none", "-crop", icon_size + "+0+0", f.name, icon_location])
+                svg_fp.flush()
 
-        return settings.MEDIA_URL + "generated_icons/%s.png" % key
+                # XXX: This will fail silently, which may be desirable
+                # in this case since a broken image link isn't the worst
+                # thing, but we should at least log the failure.
+                args = [
+                    'convert',
+                    '-background', 'none',
+                    '-size', generated_icon_size,
+                    '-crop', '{size}+0+0'.format(size=generated_icon_size),
+                    svg_fp.name, self.icon_path
+                ]
+                return_code = subprocess.call(args)
+                if return_code:
+                    log.warn(
+                        'convert command returned error code {return_code}: `{command}`'
+                        .format(command=' '.join(args), return_code=return_code))
 
+    @property
     def image_url(self):
         """
         Returns the URL to the thumbnail generated for the first public image

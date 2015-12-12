@@ -163,6 +163,9 @@ def _copy_records(settings):
     print('Copying reports...', end='', flush=True)
     staff_user = User.objects.filter(is_staff=True).first()
     edrr_status_map = {2: 0, 3: 1, 4: 2, 5: 3, 6: 4, 7: 5}
+    category_map = {
+        5: 13,  # Aquatic Vertebrates => Reptiles and Amphibians
+    }
     old.execute("""
         SELECT reports.id, category_id, issue_id, reported_category, reported_issue, has_sample,
         issue_desc, private_note, location_desc, reports.created_at, reports.updated_at, closed,
@@ -179,12 +182,15 @@ def _copy_records(settings):
         reported_species_id = row['reported_issue']
         if not Species.objects.filter(pk=reported_species_id).exists():
             reported_species_id = None
+        created_on = tz.localize(row['created_at'])
+        reported_category_id = row['reported_category']
+        reported_category_id = category_map.get(reported_category_id, reported_category_id)
         data = {
             'actual_species_id': actual_species_id,
             'claimed_by_id': user_id_map[row['user_id']],
             'county': County.objects.filter(the_geom__intersects=point).first(),
             'created_by_id': report_submitter_user_id[row['id']],
-            'created_on': tz.localize(row['created_at']),
+            'created_on': created_on,
             'description': row['issue_desc'] or '',
             'edrr_status': edrr_status_map.get(row['edrr_status'], None),
             'has_specimen': row['has_sample'],
@@ -192,10 +198,17 @@ def _copy_records(settings):
             'is_public': bool(row['closed'] and row['issue_id']),
             'location': row['location_desc'] or '',
             'point': point,
-            'reported_category_id': row['reported_category'],
+            'reported_category_id': reported_category_id,
             'reported_species_id': reported_species_id,
         }
         report, created = Report.objects.update_or_create(pk=pk, defaults=data)
+        if created:
+            # Note: Setting created_on when creating Reports does
+            # nothing; now is *always* used on creation when a field is
+            # configured to use auto_now_add.
+            report.created_on = created_on
+            report.save()
+
         # Create a private comment for the private_note field; the PK
         # should be large to avoid colliding with the comments that are
         # imported later.
