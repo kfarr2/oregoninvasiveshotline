@@ -11,4 +11,10 @@ Edit Comment
 {% endblock %}
 {% block content %}
 {% include "comments/_edit.html" %}
+<script>
+$("#cancel-comment").click(function(e){
+    e.preventDefault();
+    window.location.href = "{% url 'reports-detail' comment.report.pk %}";
+});
+</script>
 {% endblock %}

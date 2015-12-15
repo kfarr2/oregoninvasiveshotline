@@ -1,3 +1,4 @@
+from arcutils import will_be_deleted_with
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -44,4 +45,22 @@ def edit(request, comment_id):
         "comment": comment,
         "form": form,
         "formset": formset,
+    })
+
+def delete(request, comment_id):
+    comment = get_object_or_404(Comment, pk=comment_id)
+    report = comment.report
+    if request.method == "POST":
+        if can_edit_comment(request.user, comment):
+            comment.delete()
+            messages.success(request, "Comment Deleted")
+        else:
+            messages.warning(request, "Comment Is Not Yours To Edit")
+        return redirect("reports-detail", report.pk)
+
+    related_objects = list(will_be_deleted_with(comment))
+
+    return render(request, "delete.html", {
+        "object": comment,
+        "will_be_deleted_with": related_objects,
     })

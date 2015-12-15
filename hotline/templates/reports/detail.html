@@ -228,8 +228,18 @@ if($('.galleria').length){
 
 $('#add-comment a').click(function(e){
     e.preventDefault();
-    $(this).parent().remove();
-    $('#create-comment').slideDown();
+    $('#add-comment').css("visibility", "hidden");
+    $('#add-comment').css("display", "none").promise().done(function(){
+        $('#create-comment').slideDown();
+    });
+});
+
+$('#cancel-comment').click(function(e){
+    e.preventDefault();
+    $('#create-comment').slideUp().promise().done(function(){
+        $('#add-comment').css("display", "block");
+        $('#add-comment').css("visibility", "visible");
+    });
 });
 
 $('#id_new_species').keydown(function(){
