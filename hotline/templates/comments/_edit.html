@@ -1,3 +1,4 @@
+{% load permissions %}
 <form method="post" enctype="multipart/form-data" id="create-comment">
     <fieldset>
         <legend>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Comment</legend>
@@ -17,8 +18,27 @@
         </div>
 
         {% include '_images.html' %}
-
-        <input type="hidden" name="submit_flag" value="{{ form.SUBMIT_FLAG }}" />
-        <input type="submit" value="Submit" name="submit" />
+        <div class="row">
+            <div class="col-md-10">
+                <input type="hidden" name="submit_flag" value="{{ form.SUBMIT_FLAG }}" />
+                <input type="submit" value="Submit" name="submit" />
+                {% if comment.pk %}
+                    <a href="{% url 'reports-detail' comment.report.pk %}" class="btn btn-warning">Cancel</a>
+                {% else %}
+                    <button id="cancel-comment" class="btn btn-warning">Cancel</button>
+                {% endif %}
+            </div>
+        </div>
     </fieldset>
+    {% if comment.pk == None %}
+        <script>
+            $('#cancel-comment').click(function(e){
+                e.preventDefault();
+                $('#create-comment').slideUp().promise().done(function(){
+                    $('#add-comment').css("display", "block");
+                    $('#add-comment').css("visibility", "visible");
+                });
+            });
+        </script>
+    {% endif %}
 </form>
