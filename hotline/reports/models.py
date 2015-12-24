@@ -1,13 +1,10 @@
 import base64
 import hashlib
 import itertools
-import logging
 import os
 import posixpath
 import subprocess
 import tempfile
-
-from PIL import Image, ImageDraw, ImageFilter
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -18,9 +15,7 @@ from django.template import Context
 from django.template.loader import get_template, render_to_string
 
 from hotline.utils import generate_thumbnail
-
-
-log = logging.getLogger(__name__)
+from hotline.reports.utils import generate_icon
 
 
 class Report(models.Model):
@@ -137,92 +132,13 @@ class Report(models.Model):
         ``static/js/main.js`` also.
 
         """
-        # XXX: It seems a little weird to generate the icon here.
-        self.generate_icon()
-        return posixpath.join(settings.MEDIA_URL, self.icon_rel_path)
-
-    def generate_icon(self):
-        """Generate icon for this report.
-
-        The file path for the generated icon is based on parameters that
-        will change the appearance of the icon. This ensures the icon is
-        updated if the report's category changes.
-
-         ____
-        |    |  <- Icons look like this and are constructed in the following way:
-        | $$ |      + A transparent canvas is created to hold the icon.
-        |_  _|      + A square is placed in the canvas so that it is aligned with the top.
-          \/        + And an inverted triangle is placed directly under the square to complete the background.
-                    + The outline of the two shapes is extracted and converted to the correct color.
-                    + The icon image is pasted in the center of a transparent canvas.
-                    + And the canvas is pasted in the middle of the background.
-                    + And finally, the outline is merged on top of the background.
-        """
         if not os.path.exists(self.icon_path):
-            icon = self.category.icon
-            color = self.icon_color
-
-            # Define some really ugly, hard-coded magic numbers that we need
-            GENERATED_ICON_SIZE = (30, 45)
-            SQUARE_COORDS = [(0, 0), (30, 30)]
-            # The triangle's (inverted) base begins at 1/3 of the image width,
-            # and ends at 2/3 the image width
-            TRIANGLE_COORDS = [(10, 30), (15, 45), (20, 30)]
-
-            # ICON_OFFSET is needed so the icon shows up in the center
-            # of the background, not just the center of the image.
-            ICON_OFFSET = (0, -10)
-            TRANSPARENT = (0,0,0,0)
-            OUTLINE_COLOR = (10,10,10,255)
-
-            # Define the color mode (because the mode has to
-            # be the same in order to merge images)
-            mode = 'RGBA'
-
-            # Create a new, transparent image as a canvas with the defined mode and size.
-            canvas = Image.new(mode, GENERATED_ICON_SIZE, TRANSPARENT)
-
-            # Draw the background for the icon
-            background = ImageDraw.Draw(canvas)
-            background.rectangle(SQUARE_COORDS, fill=color)
-            background.polygon(TRIANGLE_COORDS, fill=color)
-
-            # Filter out the edges if the background and add a
-            # nice dark outline to it by traversing pixel by pixel.
-            outline = canvas.filter(ImageFilter.FIND_EDGES)
-            pixels = outline.load()
-            for i in range(outline.size[0]):
-                for j in range(outline.size[1]):
-                    if pixels[i,j] != TRANSPARENT:
-                        # Since our canvas is transparent, any pixel that
-                        # isn't transparent is guaranteed to be an edge, and
-                        # thus should have it's color changed to the outline color.
-                        pixels[i,j] = OUTLINE_COLOR
-
-            img = canvas
-            if icon and os.path.exists(icon.path):
-                # Before we can use the icon, it needs to be
-                # pasted into an image with the same properties
-                # as the background image. Otherwise, transparency
-                # will not be preserved. To do this we simply create a new image with
-                # the same properties as the canvas, and paste the icon into it.
-                icon_file = Image.open(icon.path)
-                icon_canvas = Image.new(mode, GENERATED_ICON_SIZE)
-                icon_canvas.paste(icon_file, ICON_OFFSET)
-
-                # Alpha composite merge is used to ensure transparency
-                # is preserved while moving the icon onto the canvas.
-                img = Image.alpha_composite(canvas, icon_canvas)
-            else:
-                log.warn('No icon found for this category')
-
-            # Now merge the image with the outline
-            img = Image.alpha_composite(img, outline)
-
-            try:
-                img.save(self.icon_path)
-            except IOError as e:
-                log.warn('Error while saving icon image')
+            generate_icon(
+                    self.category.icon,
+                    self.icon_color,
+                    self.icon_path,
+            )
+        return posixpath.join(settings.MEDIA_URL, self.icon_rel_path)
 
     @property
     def image_url(self):
