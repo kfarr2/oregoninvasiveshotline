@@ -11,6 +11,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.gis.db import models
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
+from django.db.models.signals import post_init
+from django.dispatch import receiver
 from django.template import Context
 from django.template.loader import get_template, render_to_string
 
@@ -132,13 +134,16 @@ class Report(models.Model):
         ``static/js/main.js`` also.
 
         """
-        if not os.path.exists(self.icon_path):
-            generate_icon(
-                    self.category.icon,
-                    self.icon_color,
-                    self.icon_path,
-            )
         return posixpath.join(settings.MEDIA_URL, self.icon_rel_path)
+
+    def generate_icon(self):
+        """
+        The file path for the generated icon is based on parameters that
+        will change the appearance of the icon. This ensures the icon is
+        updated if the report's category changes.
+        """
+        if not os.path.exists(self.icon_path):
+            generate_icon(self.category.icon, self.icon_color, self.icon_path)
 
     @property
     def image_url(self):
@@ -177,6 +182,15 @@ class Report(models.Model):
         Returns True if the reported_species differs from the actual species (and both fields are filled out)
         """
         return bool(self.reported_species and self.actual_species and self.reported_species != self.actual_species)
+
+
+@receiver(post_init, sender=Report)
+def post_init__generate_icon(sender, instance, **kwargs):
+    """
+    Generate the icon if the report has just been initialized for the first time.
+    """
+    if instance.pk is not None:
+        instance.generate_icon()
 
 
 class Invite(models.Model):
