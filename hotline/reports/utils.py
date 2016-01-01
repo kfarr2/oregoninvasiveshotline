@@ -6,19 +6,18 @@ from PIL import Image, ImageDraw, ImageFilter
 log = logging.getLogger(__name__)
 
 
-def generate_icon(icon, color, icon_path,
+def generate_icon(output_path,
+        icon=None,
+        color='#999',
         generated_icon_size=(30, 45),
         square_coords=[(0, 0), (30, 30)],
         triangle_coords=[(10, 30), (15, 45), (20, 30)],
         icon_offset=(0, -10),
         transparent=(0,0,0,0),
         outline_color=(10,10,10,255)):
-    """Generate icon for this report.
+    """Generate pin icon for this report.
 
-    The file path for the generated icon is based on parameters that
-    will change the appearance of the icon. This ensures the icon is
-    updated if the report's category changes.
-
+    If no icon or color is specified, then a grey pin icon with no inner icon will be created.
      ____
     |    |  <- Icons look like this and are constructed in the following way:
     | $$ |      + A transparent canvas is created to hold the icon.
@@ -74,7 +73,7 @@ def generate_icon(icon, color, icon_path,
     img = Image.alpha_composite(img, outline)
 
     try:
-        img.save(icon_path)
+        img.save(output_path)
     except IOError as e:
         log.warn('Error while saving icon image')
 
