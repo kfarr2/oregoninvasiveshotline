@@ -94,7 +94,7 @@ class ReportTest(TestCase):
 
         return_value = Mock(hexdigest=Mock(return_value='foo'))
         with patch('hotline.reports.models.hashlib.md5', return_value=return_value):
-            report.icon_url
+            report.generate_icon()
 
         file_name = os.path.join(settings.MEDIA_ROOT, 'generated_icons', 'foo.png')
         self.assertTrue(os.path.exists(file_name))
