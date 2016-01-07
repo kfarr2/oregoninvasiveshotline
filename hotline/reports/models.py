@@ -143,7 +143,7 @@ class Report(models.Model):
         updated if the report's category changes.
         """
         if not os.path.exists(self.icon_path):
-            generate_icon(self.category.icon, self.icon_color, self.icon_path)
+            generate_icon(self.icon_path, self.category.icon, self.icon_color)
 
     @property
     def image_url(self):
